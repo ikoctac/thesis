@@ -16,7 +16,7 @@ model = BartForConditionalGeneration.from_pretrained(model_path)
 token = BartTokenizer.from_pretrained(model_path)
 
 # unpin the part below and pin the above to load the t5-small model.
-# model_path = r"C:\Users\theap\Desktop\project-main\project-main\model"
+# model_path = r"C:\Users\theap\Desktop\project-main\project-main\model-t5"
 # model = T5ForConditionalGeneration.from_pretrained(model_path)
 # token = T5Tokenizer.from_pretrained(model_path)
 

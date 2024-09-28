@@ -1,4 +1,8 @@
 
 my_env/
-model/
+model-t5/
 model-bart/
+csv_files/speech_data_el-GR.csv
+csv_files/speech_data_en-US.csv
+data-bart.py
+data-t5-small.py
