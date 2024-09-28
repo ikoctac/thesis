@@ -1,7 +1,6 @@
 import os
 from PIL import Image, ImageTk
 import tkinter as tk
-from transformers import pipeline
 from transformers import T5ForConditionalGeneration, T5Tokenizer,BartForConditionalGeneration, BartTokenizer
 
 # path of ASL photos, should change in case of swapping folders.

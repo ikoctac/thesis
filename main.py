@@ -1,10 +1,9 @@
 import speech_recognition as sr
 import os
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0' # ML Model
 from datetime import datetime
 from functions import *
 from mapping import *  # importing necessary functions from the secondary program.
-import tensorflow as tf
 
 # initalize recognizer.
 recognizer = sr.Recognizer()
