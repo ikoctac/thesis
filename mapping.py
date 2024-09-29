@@ -2,20 +2,24 @@ import os
 from PIL import Image, ImageTk
 import tkinter as tk
 from transformers import T5ForConditionalGeneration, T5Tokenizer,BartForConditionalGeneration, BartTokenizer
+from dotenv import load_dotenv
 
-# path of ASL photos, should change in case of swapping folders.
-AS_IMAGE_DIRECTORY = r"C:\Users\theap\Desktop\project-main\project-main\ASL_Photos"
-GS_IMAGE_DIRECTORY = r"C:\Users\theap\Desktop\project-main\project-main\GSL_Photos"
+# prefix for directories
+load_dotenv()
+
+# path of ASL,GSL photos
+AS_IMAGE_DIRECTORY = os.getenv("AS_IMAGE_DIRECTORY")
+GS_IMAGE_DIRECTORY = os.getenv("GS_IMAGE_DIRECTORY")
 
 
 # token is used to map input text to smaller portions so the model can handle them better.
 # used to load the bart model.
-model_path = r"C:\Users\theap\Desktop\project-main\project-main\model-bart"
+model_path = os.getenv("MODEL_BART_PATH")
 model = BartForConditionalGeneration.from_pretrained(model_path)
 token = BartTokenizer.from_pretrained(model_path)
 
 # unpin the part below and pin the above to load the t5-small model.
-# model_path = r"C:\Users\theap\Desktop\project-main\project-main\model-t5"
+# model_path = os.getenv("MODEL_T5_PATH")
 # model = T5ForConditionalGeneration.from_pretrained(model_path)
 # token = T5Tokenizer.from_pretrained(model_path)
 

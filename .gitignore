@@ -1,5 +1,6 @@
 
 my_env/
+.env
 model-t5/
 model-bart/
 csv_files/speech_data_el-GR.csv
