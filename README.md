@@ -9,4 +9,5 @@ You will also need to change the paths to various location in the code in order 
 
 If you have any problems or questions send an email to ikoctac@gmail.com.
 
+Change directories in the .env.example folder.
 Python 3.12.4
