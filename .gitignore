@@ -7,3 +7,4 @@ model-bart/
 csv_files/*.csv
 data-bart.py
 data-t5-small.py 
+data-conversation.py

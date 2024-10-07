@@ -23,7 +23,7 @@ token = BartTokenizer.from_pretrained(model_path)
 # model = T5ForConditionalGeneration.from_pretrained(model_path)
 # token = T5Tokenizer.from_pretrained(model_path)
 
-
+# function to simplify the input text with the use of ML models.
 def simplify_text_for_asl(input_text):
     try:
         # split the input text to subwords to get a more effective result.
