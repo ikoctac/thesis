@@ -2,8 +2,10 @@ from transformers import BartForConditionalGeneration, BartTokenizer, Trainer, T
 from datasets import load_dataset
 import torch
 
+print(torch.cuda.is_available())  # This should return True if GPU is available
+
 # loads my tsv(tab seperated values.)
-dataset = load_dataset('csv', data_files=r'C:\Users\kostas\Desktop\DIplomatic Project\dataset\Data-huggingface\wiki.full.aner.ori.train.95.tsv', delimiter='\t')
+dataset = load_dataset('csv', data_files=r'C:\Users\kostas\Desktop\thesis\converted_svo_dataset.tsv', delimiter='\t')
 
 # uses 90% of my dataset as training data and the rest 10% as testing data.
 dataset = dataset['train'].train_test_split(test_size=0.1)
@@ -30,16 +32,17 @@ tokenized_datasets = dataset.map(preprocess_function, batched=True)
 
 # define training arguments for my model(based on my computer power and having an efficient training, make the process faster.) It took≈3.45 hours to train Bart in this dataset
 training_args = TrainingArguments(
-    per_device_train_batch_size=5,
-    per_device_eval_batch_size=5,
+    per_device_train_batch_size=6,
+    per_device_eval_batch_size=6,
     output_dir='./results',
-    num_train_epochs=2,
+    num_train_epochs=5,
     logging_dir='./logs',
     logging_steps=50000,
     learning_rate=5e-5,
     weight_decay=0.01,
     warmup_steps=1000,
     fp16=True,  
+    save_total_limit=1,
 )
 
 # initialize the trainer( which model is used, training config, train dataset and test dataset.)
@@ -55,8 +58,8 @@ trainer = Trainer(
 trainer.train()
 
 # save the model 
-model.save_pretrained(r"C:\Users\kostas\Desktop\DIplomatic Project\model-bart")
-token.save_pretrained(r"C:\Users\kostas\Desktop\DIplomatic Project\model-bart")
+model.save_pretrained(r"C:\Users\kostas\Desktop\DIplomatic Project\model-bart2")
+token.save_pretrained(r"C:\Users\kostas\Desktop\DIplomatic Project\model-bart2")
 
 # evaluate the model based on the dataset.
 evaluation_results = trainer.evaluate()
