@@ -131,7 +131,6 @@ elif input_mode == 'type':
                 break  # terminates the program .
             else:
                 print("Resuming...")
-
 # used to catch invalid input from the user so the program doesnt crash.
 else:
     print("choose 'type' or 'speak'.")
