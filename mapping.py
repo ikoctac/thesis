@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageTk
 import tkinter as tk
-from transformers import T5ForConditionalGeneration, T5Tokenizer,BartForConditionalGeneration, BartTokenizer, pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import T5ForConditionalGeneration, T5Tokenizer,BartForConditionalGeneration, BartTokenizer
 from dotenv import load_dotenv
 
 # prefix for directories
@@ -14,45 +14,15 @@ GS_IMAGE_DIRECTORY = os.getenv("GS_IMAGE_DIRECTORY")
 
 # token is used to map input text to smaller portions so the model can handle them better.
 # used to load the bart model.
-model_path = os.getenv("MODEL_BART_PATH")
+model_path = os.getenv("MODEL_BART3_PATH")
 model = BartForConditionalGeneration.from_pretrained(model_path)
 token = BartTokenizer.from_pretrained(model_path)
 
-# # Load the tokenizer and model
-# tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
-# model = AutoModelForSeq2SeqLM.from_pretrained("facebook/bart-large-cnn")
-
-# # Function to simplify the input text with the use of ML models.
-# def simplify_text_for_asl(input_text):
-#     try:
-#         # Tokenize the input text to get input IDs and attention mask
-#         inputs = tokenizer(input_text, return_tensors="pt", max_length=1024, truncation=True)
-
-#         # Generate the output from the pre-trained model
-#         outputs = model.generate(
-#     inputs["input_ids"], 
-#     max_length=500, 
-#     num_beams=4, 
-#     early_stopping=True, 
-#     num_return_sequences=1,  # Only one output
-#     do_sample=False  # No sampling
-# )
-
-
-#         # Decode the generated output back to readable text
-#         simplified_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-#         return simplified_text
-    
-#     except Exception as e:
-#         print(f"Error: {e}")
-#         return input_text  # Return the original text if simplification fails
-
-
-
-# unpin the part below and pin the above to load the t5-small model.
+#uncomment to use the t5 model
 # model_path = os.getenv("MODEL_T5_PATH")
 # model = T5ForConditionalGeneration.from_pretrained(model_path)
 # token = T5Tokenizer.from_pretrained(model_path)
+
 
 # # function to simplify the input text with the use of ML models.
 def simplify_text_for_asl(input_text):

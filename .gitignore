@@ -3,12 +3,9 @@ my_env/
 venv/
 .env
 model-t5/
-model-bart/
-model-bart2/
+model-bart3/
 csv_files/*.csv
 data-bart.py
-data-t5-small.py 
-data-conversation.py
 logs/
 results/
 data-pretrained-new.py
