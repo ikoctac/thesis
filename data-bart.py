@@ -1,4 +1,4 @@
-from transformers import BartForConditionalGeneration, BartTokenizer, Trainer, TrainingArguments
+from transformers import BartForConditionalGeneration, BartTokenizer, Trainer, TrainingArguments, EarlyStoppingCallback
 from datasets import load_dataset
 import torch
 
@@ -32,18 +32,28 @@ tokenized_datasets = dataset.map(preprocess_function, batched=True)
 
 # define training arguments for my model(based on my computer power and having an efficient training, make the process faster.) It took≈3.45 hours to train Bart in this dataset
 training_args = TrainingArguments(
-    per_device_train_batch_size=6,
-    per_device_eval_batch_size=6,
-    output_dir='./results',
-    num_train_epochs=5,
-    logging_dir='./logs',
-    logging_steps=50000,
-    learning_rate=5e-5,
-    weight_decay=0.01,
-    warmup_steps=1000,
-    fp16=True,  
-    save_total_limit=1,
+    output_dir='./results',                  # Directory for saving the model
+    num_train_epochs=5,                      # Number of training epochs
+    per_device_train_batch_size=16,          # Batch size for training
+    per_device_eval_batch_size=16,           # Batch size for evaluation
+    logging_dir='./logs',                    # Directory for storing logs
+    logging_steps=500,                       # Log every 500 steps (reduced for more frequent logging)
+    learning_rate=5e-5,                      # Learning rate
+    weight_decay=0.01,                       # Weight decay for regularization
+    warmup_steps=1000,                       # Number of warmup steps
+    fp16=True,                               # Use mixed precision training if supported
+    save_total_limit=1,                      # Limit the total number of saved checkpoints
+    evaluation_strategy='steps',              # Evaluate every X steps
+    eval_steps=500,                          # Number of steps between evaluations
+    save_steps=500,                          # Save the model every X steps
+    load_best_model_at_end=True,             # Load the best model when finished training
+    metric_for_best_model='loss',             # Specify the metric to use for the best model
+    greater_is_better=False,                  # Specify whether a higher or lower metric is better
+    report_to='tensorboard',                  # Report results to TensorBoard
+    gradient_accumulation_steps=2,           # Accumulate gradients over multiple steps
+    fp16_opt_level='O1',                      # Mixed precision level for FP16
 )
+
 
 # initialize the trainer( which model is used, training config, train dataset and test dataset.)
 trainer = Trainer(
@@ -51,8 +61,10 @@ trainer = Trainer(
     args=training_args,
     train_dataset=tokenized_datasets['train'],
     eval_dataset=tokenized_datasets['test'],
-    tokenizer=token
+    tokenizer=token,
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=2)]  # Stop if no improvement for 2 evaluations
 )
+
 
 # train the model(Bart)
 trainer.train()
