@@ -4,6 +4,7 @@ venv/
 .env
 model-t5/
 model-bart3/
+t5/
 csv_files/*.csv
 data-bart.py
 logs/
