@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import spacy
-from transformers import BartForConditionalGeneration, BartTokenizer, T5ForConditionalGeneration, T5Tokenizer
+from transformers import T5ForConditionalGeneration, T5Tokenizer
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from evaluate import load  # Hugging Face evaluate library
 from nltk.translate.meteor_score import meteor_score  # NLTK METEOR
@@ -33,19 +33,19 @@ t5_8_model = T5ForConditionalGeneration.from_pretrained(MODEL_T5_8EPOCH_PATH)
 t5_8_tokenizer = T5Tokenizer.from_pretrained(MODEL_T5_8EPOCH_PATH)
 
 # Load SpaCy model
-nlp = spacy.load("en_core_web_sm")  # Make sure you have SpaCy installed and the model downloaded
+nlp = spacy.load("en_core_web_sm")  # Ensure SpaCy is installed and the model is downloaded
 
-# Load Rouge scorer using Hugging Face's evaluate
+# Load ROUGE scorer using Hugging Face's evaluate
 rouge = load("rouge")
 
-# Define a function to generate simplified text
+# Function to generate simplified text
 def generate_simplified_text(model, tokenizer, input_text, max_length=50):
     inputs = tokenizer(input_text, return_tensors='pt', max_length=512, truncation=True)
     summary_ids = model.generate(inputs['input_ids'], max_length=max_length, min_length=5, num_beams=4, length_penalty=2.0, early_stopping=True)
     simplified_text = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     return simplified_text
 
-# Define a function to calculate BLEU score with smoothing
+# Function to calculate BLEU score with smoothing
 def calculate_bleu_score(reference, hypothesis):
     reference = [reference.split()]  # BLEU expects a list of references (each a list of words)
     hypothesis = hypothesis.split()
@@ -88,8 +88,8 @@ def evaluate_models(test_data):
             rouge_score = rouge.compute(predictions=[simplified_text], references=[target_text])['rougeL']
             metrics[model_name]['rouge'].append(rouge_score)
             
-            # Calculate METEOR score
-            meteor = meteor_score([target_text], simplified_text)
+            # Calculate METEOR score (tokenize both target and simplified texts)
+            meteor = meteor_score([target_text.split()], simplified_text.split())  # Both should be tokenized into lists
             metrics[model_name]['meteor'].append(meteor)
 
             # Print sample outputs for comparison
