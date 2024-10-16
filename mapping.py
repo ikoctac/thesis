@@ -1,51 +1,37 @@
 import os
 from PIL import Image, ImageTk
 import tkinter as tk
-from transformers import T5ForConditionalGeneration, T5Tokenizer,BartForConditionalGeneration, BartTokenizer
+from transformers import T5ForConditionalGeneration, T5Tokenizer
 from dotenv import load_dotenv
 
-# prefix for directories
+# Load environment variables
 load_dotenv()
 
-# path of ASL,GSL photos
+# Path of ASL and GSL photos
 AS_IMAGE_DIRECTORY = os.getenv("AS_IMAGE_DIRECTORY")
 GS_IMAGE_DIRECTORY = os.getenv("GS_IMAGE_DIRECTORY")
 
+# Load T5 model and tokenizer
+model_path = os.getenv("MODEL_T5_4EPOCH_PATH")
+model = T5ForConditionalGeneration.from_pretrained(model_path)
+tokenizer = T5Tokenizer.from_pretrained(model_path)
 
-# token is used to map input text to smaller portions so the model can handle them better.
-# used to load the bart model.
-model_path = os.getenv("MODEL_BART3_PATH")
-model = BartForConditionalGeneration.from_pretrained(model_path)
-token = BartTokenizer.from_pretrained(model_path)
-
-#uncomment to use the t5 model
-# model_path = os.getenv("MODEL_T5_PATH")
-# model = T5ForConditionalGeneration.from_pretrained(model_path)
-# token = T5Tokenizer.from_pretrained(model_path)
-
-
-# # function to simplify the input text with the use of ML models.
+# Function to simplify the input text with the pre-trained model
 def simplify_text_for_asl(input_text):
     try:
-        # split the input text to subwords to get a more effective result.
-        input_ids = token.encode(input_text, return_tensors="pt")
-
-        # used to generate the output of my pre-trained model.
+        # Simplify the text using the pre-trained model
+        input_ids = tokenizer.encode(input_text, return_tensors="pt")
         outputs = model.generate(input_ids, max_length=500, num_beams=4, early_stopping=True)
-
-        # maps the output tokens to words so the text can be readable by the user.
-        simplified_text = token.decode(outputs[0], skip_special_tokens=True)
+        simplified_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
         return simplified_text
+
     except Exception as e:
         print(f"Error: {e}")
-        return input_text  # used to return original text if simplification fails 
+        return input_text  # Return original text if simplification fails
 
-# map each letter of users input to corresponding ASL sign image.
+# Map each letter of user's input to corresponding ASL sign image
 def map_text_to_asl_images(text, language):
-    # convert text to uppercase to make the process easier.
     text = text.upper()
-
-    # list to hold path of images to each letter in the input.
     image_paths = []
 
     if language == 'en-US':
@@ -56,67 +42,40 @@ def map_text_to_asl_images(text, language):
         print("Invalid choice, setting ASL as default.")
         directory = AS_IMAGE_DIRECTORY
 
-    # iterate through each letter in the text.
     for letter in text:
-        if letter in [' ', "'",'"',':','[',']','.',',']:  # for special characters.
+        if letter in [' ', "'", '"', ':', '[', ']', '.', ',']:
             continue
-
-        # construct filename of the corresponding ASL image.
-        if isinstance(letter, str):
-            image_name = f"Sign_language_{letter}.png"
-        else:
-            image_name = f"Sign_language_{str(letter)}.png"  # if images have diff extensions we might have a problem, the displayer is set for transparent images.
-
-        # full path to the ASL image.
+        image_name = f"Sign_language_{letter}.png"
         image_path = os.path.join(directory, image_name)
 
-        # check if image exists.
         if os.path.exists(image_path):
-            # if yes, add it to the list.
             image_paths.append(image_path)
         else:
-            # if not prompt the "error".
             print(f"No ASL sign image found for '{letter}'")
 
-    # return list of image paths.
     return image_paths
 
-# display images sequentially with preferred delay.
+# Display images sequentially with a preferred delay
 def display_images_sequentially(image_paths, delay=500):
-    # Tkinter window creation.
     window = tk.Tk()
     window.title("ASL Viewer")
-
-    # canvas for displaying images.
     canvas = tk.Canvas(window, width=400, height=400)
     canvas.pack()
 
-    # load and display each image with delay.
-    for i, image_path in enumerate(image_paths):
-        # open the image using PIL.
-        image = Image.open(image_path).convert("RGBA")  
+    def display_image(i):
+        if i >= len(image_paths):
+            window.destroy()
+            return
 
-        # resize image to fit the canvas.
+        image = Image.open(image_paths[i]).convert("RGBA")
         image = image.resize((400, 400), Image.LANCZOS)
-
-        # convert the image to a format compatible with Tkinter.
         tk_image = ImageTk.PhotoImage(image)
 
-        # clear previous image.
         canvas.delete("all")
-
-        # display new image on the canvas.
         canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+        canvas.image = tk_image
 
-        # update the canvas to display new image.
-        canvas.update()
+        window.after(delay, display_image, i + 1)
 
-        # check for last image.
-        if i == len(image_paths) - 1:
-            # if its last close window.
-            window.after(delay, window.destroy)
-        else:
-            # initiate desired delay.
-            window.after(delay)
-
+    display_image(0)
     window.mainloop()
