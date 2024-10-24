@@ -1,46 +1,51 @@
 import os
 from PIL import Image, ImageTk
 import tkinter as tk
-from transformers import T5ForConditionalGeneration, T5Tokenizer
+from transformers import T5ForConditionalGeneration, T5Tokenizer, BartTokenizer, BartForConditionalGeneration
 from dotenv import load_dotenv
 
-# Load environment variables
+# load paths from .env
 load_dotenv()
 
-# Path of ASL and GSL photos
-AS_IMAGE_DIRECTORY = os.getenv("AS_IMAGE_DIRECTORY")
-GS_IMAGE_DIRECTORY = os.getenv("GS_IMAGE_DIRECTORY")
+# path for ASL AND GSL
+ASL_DIR = os.getenv("ASL")
+GSL_DIR = os.getenv("GSL")
 
-# Load T5 model and tokenizer
-model_path = os.getenv("MODEL_T5_4EPOCH_PATH")
-model = T5ForConditionalGeneration.from_pretrained(model_path)
-tokenizer = T5Tokenizer.from_pretrained(model_path)
+# # load prefered model and its tokens
+# model_dir = os.getenv("MODEL_T5")
+# model = T5ForConditionalGeneration.from_pretrained(model_dir)
+# token = T5Tokenizer.from_pretrained(model_dir)
 
-# Function to simplify the input text with the pre-trained model
+# unpin to use for bart model
+model_dir = os.getenv("MODEL_BART")
+model = BartForConditionalGeneration.from_pretrained(model_dir)
+token = BartTokenizer.from_pretrained(model_dir)
+
+# summary/simplify func for the choosen model
 def simplify_text_for_asl(input_text):
     try:
-        # Simplify the text using the pre-trained model
-        input_ids = tokenizer.encode(input_text, return_tensors="pt")
+        # summary/simplify the input text
+        input_ids = token.encode(input_text, return_tensors="pt")
         outputs = model.generate(input_ids, max_length=500, num_beams=4, early_stopping=True)
-        simplified_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        simplified_text = token.decode(outputs[0], skip_special_tokens=True)
         return simplified_text
 
     except Exception as e:
         print(f"Error: {e}")
-        return input_text  # Return original text if simplification fails
+        return input_text  # escape clause if summary fails
 
-# Map each letter of user's input to corresponding ASL sign image
+# map input letters to each ASL/GSL needed
 def map_text_to_asl_images(text, language):
     text = text.upper()
     image_paths = []
 
     if language == 'en-US':
-        directory = AS_IMAGE_DIRECTORY
+        directory = ASL_DIR
     elif language == 'el-GR':
-        directory = GS_IMAGE_DIRECTORY
+        directory = GSL_DIR
     else:
         print("Invalid choice, setting ASL as default.")
-        directory = AS_IMAGE_DIRECTORY
+        directory = ASL_DIR
 
     for letter in text:
         if letter in [' ', "'", '"', ':', '[', ']', '.', ',']:
@@ -55,7 +60,7 @@ def map_text_to_asl_images(text, language):
 
     return image_paths
 
-# Display images sequentially with a preferred delay
+# display image with delay
 def display_images_sequentially(image_paths, delay=500):
     window = tk.Tk()
     window.title("ASL Viewer")
