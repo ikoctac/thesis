@@ -12,27 +12,54 @@ ASL_DIR = os.getenv("ASL")
 GSL_DIR = os.getenv("GSL")
 
 # # load prefered model and its tokens
-# model_dir = os.getenv("MODEL_T5")
-# model = T5ForConditionalGeneration.from_pretrained(model_dir)
-# token = T5Tokenizer.from_pretrained(model_dir)
+model_dir = os.getenv("MODEL_T5")
+model = T5ForConditionalGeneration.from_pretrained(model_dir)
+token = T5Tokenizer.from_pretrained(model_dir)
 
 # unpin to use for bart model
-model_dir = os.getenv("MODEL_BART")
-model = BartForConditionalGeneration.from_pretrained(model_dir)
-token = BartTokenizer.from_pretrained(model_dir)
+# model_dir = os.getenv("MODEL_BART")
+# model = BartForConditionalGeneration.from_pretrained(model_dir)
+# token = BartTokenizer.from_pretrained(model_dir)
 
-# summary/simplify func for the choosen model
 def simplify_text_for_asl(input_text):
     try:
-        # summary/simplify the input text
-        input_ids = token.encode(input_text, return_tensors="pt")
-        outputs = model.generate(input_ids, max_length=500, num_beams=4, early_stopping=True)
-        simplified_text = token.decode(outputs[0], skip_special_tokens=True)
+        # Prepend the task prefix for summarization
+        input_text = f"summarize: {input_text}"
+
+        # Tokenize the input text
+        input_ids = token.encode(input_text, return_tensors='pt', max_length=512, truncation=True)
+
+        # Generate summary ids
+        summary_ids = model.generate(
+            input_ids,
+            num_beams=4,
+            no_repeat_ngram_size=2,
+            length_penalty=2.0,
+            min_length=30,
+            max_length=150,
+            early_stopping=True
+        )
+
+        # Decode the generated summary
+        simplified_text = token.decode(summary_ids[0], skip_special_tokens=True)
         return simplified_text
 
     except Exception as e:
         print(f"Error: {e}")
-        return input_text  # escape clause if summary fails
+        return input_text  # Return original text if summarization fails
+    
+# # summary/simplify func for the choosen model
+# def simplify_text_for_asl(input_text):
+#     try:
+#         # summary/simplify the input text
+#         input_ids = token.encode(input_text, return_tensors="pt")
+#         outputs = model.generate(input_ids, max_length=500, num_beams=4, early_stopping=True)
+#         simplified_text = token.decode(outputs[0], skip_special_tokens=True)
+#         return simplified_text
+
+#     except Exception as e:
+#         print(f"Error: {e}")
+#         return input_text  # escape clause if summary fails
 
 # map input letters to each ASL/GSL needed
 def map_text_to_asl_images(text, language):
@@ -48,7 +75,7 @@ def map_text_to_asl_images(text, language):
         directory = ASL_DIR
 
     for letter in text:
-        if letter in [' ', "'", '"', ':', '[', ']', '.', ',']:
+        if letter in [' ', "'", '"', ':', '[', ']', '.', ',','-','-']:
             continue
         image_name = f"Sign_language_{letter}.png"
         image_path = os.path.join(directory, image_name)
