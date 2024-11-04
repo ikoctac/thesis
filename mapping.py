@@ -12,14 +12,14 @@ ASL_DIR = os.getenv("ASL")
 GSL_DIR = os.getenv("GSL")
 
 # # load prefered model and its tokens
-model_dir = os.getenv("MODEL_T5")
-model = T5ForConditionalGeneration.from_pretrained(model_dir)
-token = T5Tokenizer.from_pretrained(model_dir)
+# model_dir = os.getenv("MODEL_T5")
+# model = T5ForConditionalGeneration.from_pretrained(model_dir)
+# token = T5Tokenizer.from_pretrained(model_dir)
 
 # unpin to use for bart model
-# model_dir = os.getenv("MODEL_BART")
-# model = BartForConditionalGeneration.from_pretrained(model_dir)
-# token = BartTokenizer.from_pretrained(model_dir)
+model_dir = os.getenv("MODEL_BART")
+model = BartForConditionalGeneration.from_pretrained(model_dir)
+token = BartTokenizer.from_pretrained(model_dir)
 
 def simplify_text_for_asl(input_text):
     try:
