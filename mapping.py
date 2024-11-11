@@ -1,35 +1,31 @@
 import os
 from PIL import Image, ImageTk
 import tkinter as tk
-from transformers import T5ForConditionalGeneration, T5Tokenizer, BartTokenizer, BartForConditionalGeneration
+from transformers import BartForConditionalGeneration, BartTokenizer
 from dotenv import load_dotenv
 
-# load paths from .env
+# Load paths from .env
 load_dotenv()
 
-# path for ASL AND GSL
+# Path for ASL AND GSL (still need to load from .env)
 ASL_DIR = os.getenv("ASL")
 GSL_DIR = os.getenv("GSL")
-
-# # load prefered model and its tokens
-# model_dir = os.getenv("MODEL_T5")
-# model = T5ForConditionalGeneration.from_pretrained(model_dir)
-# token = T5Tokenizer.from_pretrained(model_dir)
 
 # unpin to use for bart model
 model_dir = os.getenv("MODEL_BART")
 model = BartForConditionalGeneration.from_pretrained(model_dir)
 token = BartTokenizer.from_pretrained(model_dir)
 
+# Function to simplify text (for summarization)
 def simplify_text_for_asl(input_text):
     try:
-        # Prepend the task prefix for summarization
-        input_text = f"summarize: {input_text}"
-
+        # Prepend the task prefix for summarization (for BART model)
+        input_text = "summarize: " + input_text
+        
         # Tokenize the input text
-        input_ids = token.encode(input_text, return_tensors='pt', max_length=512, truncation=True)
-
-        # Generate summary ids
+        input_ids = token.encode(input_text, return_tensors="pt", max_length=512, truncation=True)
+        
+        # Generate summary ids with beam search and penalties to control repetitiveness
         summary_ids = model.generate(
             input_ids,
             num_beams=4,
@@ -39,7 +35,7 @@ def simplify_text_for_asl(input_text):
             max_length=150,
             early_stopping=True
         )
-
+        
         # Decode the generated summary
         simplified_text = token.decode(summary_ids[0], skip_special_tokens=True)
         return simplified_text
@@ -47,25 +43,13 @@ def simplify_text_for_asl(input_text):
     except Exception as e:
         print(f"Error: {e}")
         return input_text  # Return original text if summarization fails
-    
-# # summary/simplify func for the choosen model
-# def simplify_text_for_asl(input_text):
-#     try:
-#         # summary/simplify the input text
-#         input_ids = token.encode(input_text, return_tensors="pt")
-#         outputs = model.generate(input_ids, max_length=500, num_beams=4, early_stopping=True)
-#         simplified_text = token.decode(outputs[0], skip_special_tokens=True)
-#         return simplified_text
 
-#     except Exception as e:
-#         print(f"Error: {e}")
-#         return input_text  # escape clause if summary fails
-
-# map input letters to each ASL/GSL needed
+# Function to map input letters to each ASL/GSL needed
 def map_text_to_asl_images(text, language):
-    text = text.upper()
+    text = text.upper()  # Convert text to uppercase for consistency
     image_paths = []
 
+    # Set the directory based on the language choice
     if language == 'en-US':
         directory = ASL_DIR
     elif language == 'el-GR':
@@ -74,12 +58,17 @@ def map_text_to_asl_images(text, language):
         print("Invalid choice, setting ASL as default.")
         directory = ASL_DIR
 
+    # Iterate over each character in the text
     for letter in text:
-        if letter in [' ', "'", '"', ':', '[', ']', '.', ',','-','-']:
+        # Skip characters that are not letters or numbers
+        if letter in [' ', "'", '"', ':', '[', ']', '.', ',', '-', '_']:
             continue
+
+        # Construct the image filename
         image_name = f"Sign_language_{letter}.png"
         image_path = os.path.join(directory, image_name)
 
+        # Check if the image exists in the directory and add it to the list
         if os.path.exists(image_path):
             image_paths.append(image_path)
         else:
@@ -87,7 +76,7 @@ def map_text_to_asl_images(text, language):
 
     return image_paths
 
-# display image with delay
+# Function to display images sequentially with a delay
 def display_images_sequentially(image_paths, delay=500):
     window = tk.Tk()
     window.title("ASL Viewer")
@@ -111,3 +100,14 @@ def display_images_sequentially(image_paths, delay=500):
 
     display_image(0)
     window.mainloop()
+
+# Function to integrate all tasks
+def process_and_display(input_text, language='en-US'):
+    # Simplify the input text first
+    simplified_text = simplify_text_for_asl(input_text)
+
+    # Map the simplified text to ASL images
+    image_paths = map_text_to_asl_images(simplified_text, language)
+
+    # Display the images sequentially
+    display_images_sequentially(image_paths)
