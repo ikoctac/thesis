@@ -1,136 +1,159 @@
 import speech_recognition as sr
 import os
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0' # ML Model
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 from datetime import datetime
 from functions import *
-from mapping import *  # importing necessary functions from the secondary program.
+# from mapping import *
+from mapping import simplify_text_for_asl,display_images_sequentially
 
-# initalize recognizer.
+# initialize recognizer
 recognizer = sr.Recognizer()
 
-# define current speaker.
-current_speaker = "person 1"
+# starting speaker
+cur_speaker = "Person 1"
 
-# get the current directory of the script.
-current_directory = os.path.dirname(os.path.abspath(__file__))
+#set the delay for pictures
+def_delay = 200
 
-# directory path where you save the CSV file, this way we can create a dataset.
-directory_path = os.path.join(current_directory, "csv_files")
+# directory for the csv later
+cur_directory = os.path.dirname(os.path.abspath(__file__))
 
-# user chooses if he will type or speak. 
-input_mode = input("do you want to type or speak? (type/speak): ").strip().lower()
+# where the csv is going to be saved
+directory_path = os.path.join(cur_directory, "csv_files")
+
+# mode between simple translate and using a ML model for summarize big sentences
+while True:
+    speak_mode()
+    mode_choice = input("Do you want to simplify (summarize) or just translate to ASL? (simplify/translate): ").strip().lower()
+    if mode_choice in ['simplify', 'translate']:
+        break
+    else: #loop until valid input
+        print("Invalid choice. Please choose 'simplify' or 'translate'.")
+
+# choose type for convenience or speak to try the speech recognition
+while True:
+    speak_input()
+    input_mode = input("Do you want to type or speak? (type/speak): ").strip().lower()
+    if input_mode in ['speak', 'type']:
+        break
+    else: #loop until valid input
+        print("Invalid choice. Please choose 'type' or 'speak'.")
 
 if input_mode == 'speak':
-    # use the default microphone as source, bot asks what language will the user speak and then prompt the available languages.
+    # use the default microphone as source, bot asks what language will the user use.
     with sr.Microphone() as source:
-        speak_language_prompt()  # bot asks user what they will use (Function is in separate py file.)
+        speak_language_prompt()  # language selection 
         language = select_language()
-        print(f"listening {language}...")
+        print(f"Listening in {language}...")
 
-        # create the csv_filename
+        # csv file creation
         csv_filename = os.path.join(directory_path, f"speech_data_{language}.csv")
 
-        # adjust for ambient noise if necessary.
+        # adjust for ambient noise if necessary
         recognizer.adjust_for_ambient_noise(source)
 
-        # continuously listen for speech.
+        # loop for listening to users input
         while True:
             try:
-                # capture users audio 
+                # capture user audio
                 audio = recognizer.listen(source)
 
-                # converts speech to text using the selected language.
+                # convert speech to text using the selected language
                 text = recognizer.recognize_google(audio, language=language)
 
-                # get timestamp for csv reference.
+                # timestamp for csv
                 timestamp = datetime.now().strftime("%H:%M:%S")
+                
+                # if the language is greek it will only translate
+                if language == 'el-GR':
+                    simplified_text = text
+                else:
+                    # used to choose between translate or simplify
+                    if mode_choice == 'simplify':
+                        simplified_text = simplify_text_for_asl(text)
+                    else:
+                        simplified_text = text  # if anything else than simplify it will just translate the text
 
-                # print what the user said. uncomment if you want the original text printed
-                # print(f"{current_speaker} said:", text)
+                # print procecced text
+                print(f"Processed Text: {simplified_text}")
 
-                # output of the trained model based on the dataset provided(the loaded model location is in mapping.py and is loaded from import.)
-                simplified_text = simplify_text_for_asl(text)
-                print(f"simplified Text: {simplified_text}")
+                simplified_text = list(simplified_text)
+                #display images
+                display_images_sequentially(simplified_text, language, def_delay)
 
-                # save the data to CSV file with speaker identifier.
-                save_to_csv(csv_filename, timestamp, text, simplified_text, current_speaker)
+                # save data with the timestamp,text,simplified_text and the speaker
+                save_to_csv(csv_filename, timestamp, text, simplified_text, cur_speaker)
 
-                # used to map the converted/translated text to the pictures in my files (function is imported from mapping.py and is loaded from import.)
-                asl_images = map_text_to_asl_images(simplified_text, language)
-
-                # display ASL images sequentially.
-                display_images_sequentially(asl_images)
-
-                # check for switch commands( used to differantiate between users for a cleaner dataset, also imported from functions.py.) 
+                # switch the speaker command
                 if check_switch_command(text, language):
-                    print(" Who is speaking?")
+                    print("Who is speaking?")
                     new_speaker = input("Enter the new speaker (e.g., Person 2): ")
-                    current_speaker = new_speaker
+                    cur_speaker = new_speaker
                     print(f"Switched to {new_speaker}")
 
-                # check for termination phrase( only works when users says a termination phrase once.)
+                # termination function
                 elif check_termination_phrase(text, language):
                     speak_termination_prompt()
                     decision = input("Do you want to terminate the process? (yes/no): ")
                     if decision.lower() == 'yes':
                         print("Terminating the process.")
-                        break  # termination of the program.
+                        break
                     else:
                         print("Resuming...")
 
-            # used to identify any audio problems when user is speaking ( it informs if it doenst catch what the user said.)
+            # used to see if the microphone is still capturing audio
             except sr.UnknownValueError:
-                print("Audio output has a problem.")
+                print("Could not understand audio.")
             except sr.RequestError as e:
-                print("Error; {0}".format(e))
+                print(f"Error: {e}")
 
 elif input_mode == 'type':
-    # used when user types "type" in the start of the program to choose to manually enter what he is going to say( make it more functional and faster because the google recognizer needs fast internet access and thats not always the case.)
-    speak_language_prompt()  # bot asks user what language they will use (Function is in a separate py file.)
-    language = select_language() # uses the selected language.
-    print(f"typing in {language}...") 
+    speak_language_prompt()  # language selection
+    language = select_language()
+    print(f"Typing in {language}...")
 
-    # create the csv_filename
+    # csv creation 
     csv_filename = os.path.join(directory_path, f"speech_data_{language}.csv")
 
     while True:
-        # user manually inputs the paragraph he wants to translate.
-        text = input(f"{current_speaker}, please type your input: ").strip()
+        # manualy input the user text
+        text = input(f"{cur_speaker}, please type your input: ").strip()
 
-        # get timestamp for csv reference
+        # timestamps for csv
         timestamp = datetime.now().strftime("%H:%M:%S")
 
-        # print what the user typed
-        # print(f"{current_speaker} typed:", text)
+        # if the language is greek it will only translate
+        if language == 'el-GR':
+            simplified_text = text
+        else:
+            # used to choose between translate or simplify
+            if mode_choice == 'simplify':
+                simplified_text = simplify_text_for_asl(text)
+            else:
+                simplified_text = text  # if anything else than simplify it will just translate the text  
 
-        simplified_text = simplify_text_for_asl(text)
-        print(f"simplified Text: {simplified_text}")
+        #print text to ASL
+        print(f"Processed Text: {simplified_text}")
 
-         # save the data to CSV file with speaker identifier.
-        save_to_csv(csv_filename, timestamp, text, simplified_text, current_speaker)
+        # display the text to ASL images
+        display_images_sequentially(simplified_text, language, def_delay)
 
-        # used to map the text to asl images in my files(Function is imported from another file mapping.py)
-        asl_images = map_text_to_asl_images(simplified_text, language)
+        # save data with the timestamp,text,simplified_text and the speaker 
+        save_to_csv(csv_filename, timestamp, text, simplified_text, cur_speaker)
 
-        # display ASL images sequentially.
-        display_images_sequentially(asl_images)
-
-        # check for switch commands( only works when user types one time the command and not in a sentence.)
+        # switch user
         if check_switch_command(text, language):
             print("Who is speaking?")
             new_speaker = input("Enter the new speaker (e.g., Person 2): ")
-            current_speaker = new_speaker
+            cur_speaker = new_speaker
             print(f"Switched to {new_speaker}")
 
-        # check for termination phrase( only works when user types one time the command and not in a sentence.)
+        # termination phrase
         elif check_termination_phrase(text, language):
             speak_termination_prompt()
             decision = input("Do you want to terminate the process? (yes/no): ")
             if decision.lower() == 'yes':
                 print("Terminating the process.")
-                break  # terminates the program .
+                break
             else:
                 print("Resuming...")
-# used to catch invalid input from the user so the program doesnt crash.
-else:
-    print("choose 'type' or 'speak'.")

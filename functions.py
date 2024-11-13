@@ -26,25 +26,39 @@ def select_language():
     print("1. English")
     print("2. Greek")
     
-
-    language_choice = int(input("Enter the number corresponding to your language choice: "))
-    languages = {
-        1: 'en-US',
-        2: 'el-GR'
-    }
-    return languages.get(language_choice,'el-GR')  # Default to English if choice is invalid
+    while True:
+        try:
+            language_choice = int(input("Enter the number corresponding to your language choice: "))
+            languages = {
+                1: 'en-US',
+                2: 'el-GR'
+            }
+            # Return the language if it's valid, otherwise prompt the user again
+            return languages.get(language_choice, 'en-US')  # Default to Greek if choice is invalid
+        except ValueError:
+            print("Invalid input. Please enter a valid number (1 or 2).")
 
 # use pyttsx3 to vocalize the entry prompt.
 def speak_language_prompt():
-    engine.say("Select the language you'll be speaking. Choose English or Greek.")
+    engine.say("Choose English or Greek.")
     engine.runAndWait()
 
-# use pyttsx3 to vocalize the termination prompt.
+# use pyttsx3 to vocalize the choosing mode summarize or translate
+def speak_mode():
+    engine.say("Do you want to summarize or just translate to ASL?")
+    engine.runAndWait()
+
+# use pyttsx3 to vocalize type or speak
+def speak_input():
+    engine.say("Do you want to type or speak?")
+    engine.runAndWait()
+
+# use pyttsx3 to vocalize the termination prompt
 def speak_termination_prompt():
     engine.say("Do you want to terminate the process? ")
     engine.runAndWait()
 
-# used the first time to create the csv file header for each language.
+# used the first time to create the csv file header for each language
 def create_csv_file(filename):
     try:
         with open(filename, 'x', newline='', encoding='utf-8') as csvfile:
@@ -54,7 +68,7 @@ def create_csv_file(filename):
     except FileExistsError:
         pass 
 
-# in case there isnt a file and we try to save promp an error.
+# in case there isnt a file and we try to save promp an error
 def save_to_csv(filename, timestamp, text, simplified_text,  speaker):
     try:
         with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
@@ -72,10 +86,10 @@ def check_switch_command(text, language):
 
     commands = switch_commands.get(language, [])
     
-    # normalize text, convert it to lowercase, strip any surrounding whitespace.
+    # normalize text, convert it to lowercase, strip any surrounding whitespace
     normalized_text = text.lower().strip()
     
-    # check for match in normalized_text.
+    # check for match in normalized_text
     return normalized_text in commands
 
 
