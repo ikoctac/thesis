@@ -33,6 +33,7 @@ def simplify_text_for_asl(input_text):
         )
 
         simplified_text = token.decode(summary_ids[0], skip_special_tokens=True) # decodes produced token ids into readable text
+        simplified_text = simplified_text.replace("simplify:", "").strip() # incase program includes the simplify from the start
         return simplified_text
 
     except Exception as e:
@@ -113,7 +114,7 @@ def display_images_sequentially(text, language, delay, word_gap=1):
     thumbnail_canvas.create_window((0, 0), window=inner_frame, anchor="nw")
 
     thumbnail_size = 30 # thumbnail size to get more thumbnails in a row
-    max_thumbnails_per_row = 33 # how many thumbnails in a row
+    max_thumbnails_per_row = 38 # how many thumbnails in a row
     current_row = 0 # starting row
     current_column = 0 # starting column
 
