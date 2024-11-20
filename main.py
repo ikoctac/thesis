@@ -24,7 +24,7 @@ directory_path = os.path.join(cur_directory, "csv_files")
 # mode between simple translate and using a ML model for summarize big sentences
 while True:
     speak_mode()
-    mode_choice = input("Do you want to simplify (summarize) or just translate to ASL? (simplify/translate): ").strip().lower()
+    mode_choice = input("Do you want to simplify (summarize) or just translate to ASL? (simplify/translate): ").strip().lower()#removes white space and lowers text
     if mode_choice in ['simplify', 'translate']:
         break
     else: #loop until valid input
@@ -33,7 +33,7 @@ while True:
 # choose type for convenience or speak to try the speech recognition
 while True:
     speak_input()
-    input_mode = input("Do you want to type or speak? (type/speak): ").strip().lower()
+    input_mode = input("Do you want to type or speak? (type/speak): ").strip().lower() #removes white space and lowers text
     if input_mode in ['speak', 'type']:
         break
     else: #loop until valid input
@@ -64,7 +64,7 @@ if input_mode == 'speak':
                 # timestamp for csv
                 timestamp = datetime.now().strftime("%H:%M:%S")
                 
-                # if the language is greek it will only translate
+                # if the language is greek it will only translate, simplify cant work not enough datasets in greek trained
                 if language == 'el-GR':
                     simplified_text = text
                 else:
@@ -122,7 +122,7 @@ elif input_mode == 'type':
         # timestamps for csv
         timestamp = datetime.now().strftime("%H:%M:%S")
 
-        # if the language is greek it will only translate
+        # if the language is greek it will only translate, simplify cant work not enough datasets in greek trained
         if language == 'el-GR':
             simplified_text = text
         else:
