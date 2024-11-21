@@ -27,7 +27,7 @@ def simplify_text_for_asl(input_text):
             num_beams=6, # reduces risk to miss on hidden high probability from the word sequences, calculating probabilities for 6 words in the model's vocabulary 
             no_repeat_ngram_size=2, # no sequence of >2 words is repeated, usefull for generation but not when input text is repetitive
             length_penalty=1.0, # affects sentence length, a greater value will generate smaller sentences while this value encourages big sentences 
-            min_length=20, # will be atleast 20 tokens long
+            min_length=0, # avoid error output for smaller sentences
             max_length=100, # will max out at 100 tokens long
             early_stopping=True #stop early once all beam hypotheses have produced an EOS token
         )
@@ -114,7 +114,7 @@ def display_images_sequentially(text, language, delay, word_gap=1):
     thumbnail_canvas.create_window((0, 0), window=inner_frame, anchor="nw")
 
     thumbnail_size = 30 # thumbnail size to get more thumbnails in a row
-    max_thumbnails_per_row = 38 # how many thumbnails in a row
+    max_thumbnails_per_row = 42 # how many thumbnails in a row
     current_row = 0 # starting row
     current_column = 0 # starting column
 
@@ -137,10 +137,10 @@ def display_images_sequentially(text, language, delay, word_gap=1):
         # if we get none in the image_paths which indicates that we get space or blank images
         if image_paths[i] is None:
             if text[i] == " ":
-                # if we get a space as a word we create a gap to create the space between thumbnails
-                current_column += word_gap
-            # next image in the sequence
-            window.after(delay, display_image, i + 1)
+                gap_label = tk.Label(inner_frame, bg="lightgray", width=thumbnail_size // 10, height=1) # grey gap_label to seperate words 
+                gap_label.grid(row=current_row, column=current_column, padx=5, pady=5) # place of the gap_label in the frame 
+                current_column += word_gap  # adds gap
+            window.after(delay, display_image, i + 1) # used to diplay images with a delay given from the user
             return
 
         # start diplaying the main images

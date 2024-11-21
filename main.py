@@ -1,9 +1,8 @@
 import speech_recognition as sr
 import os
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+# os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0' # depends on comp hardware, in each case uncomment
 from datetime import datetime
 from functions import *
-# from mapping import *
 from mapping import simplify_text_for_asl,display_images_sequentially
 
 # initialize recognizer
@@ -60,9 +59,6 @@ if input_mode == 'speak':
 
                 # convert speech to text using the selected language
                 text = recognizer.recognize_google(audio, language=language)
-
-                # timestamp for csv
-                timestamp = datetime.now().strftime("%H:%M:%S")
                 
                 # if the language is greek it will only translate, simplify cant work not enough datasets in greek trained
                 if language == 'el-GR':
@@ -73,16 +69,6 @@ if input_mode == 'speak':
                         simplified_text = simplify_text_for_asl(text)
                     else:
                         simplified_text = text  # if anything else than simplify it will just translate the text
-
-                # print procecced text
-                print(f"Processed Text: {simplified_text}")
-
-                simplified_text = list(simplified_text)
-                #display images
-                display_images_sequentially(simplified_text, language, def_delay)
-
-                # save data with the timestamp,text,simplified_text and the speaker
-                save_to_csv(csv_filename, timestamp, text, simplified_text, cur_speaker)
 
                 # switch the speaker command
                 if check_switch_command(text, language):
@@ -100,6 +86,19 @@ if input_mode == 'speak':
                         break
                     else:
                         print("Resuming...")
+
+                # print procecced text
+                print(f"Processed Text: {simplified_text}")
+
+                simplified_text = list(simplified_text)
+                #display images
+                display_images_sequentially(simplified_text, language, def_delay)
+
+                # timestamp for csv
+                timestamp = datetime.now().strftime("%H:%M:%S")
+
+                # save data with the timestamp,text,simplified_text and the speaker
+                save_to_csv(csv_filename, timestamp, text, simplified_text, cur_speaker)
 
             # used to see if the microphone is still capturing audio
             except sr.UnknownValueError:
@@ -119,8 +118,22 @@ elif input_mode == 'type':
         # manualy input the user text
         text = input(f"{cur_speaker}, please type your input: ").strip()
 
-        # timestamps for csv
-        timestamp = datetime.now().strftime("%H:%M:%S")
+        # switch user
+        if check_switch_command(text, language):
+            print("Who is speaking?")
+            new_speaker = input("Enter the new speaker (e.g., Person 2): ")
+            cur_speaker = new_speaker
+            print(f"Switched to {new_speaker}")
+
+        # termination phrase
+        elif check_termination_phrase(text, language):
+            speak_termination_prompt()
+            decision = input("Do you want to terminate the process? (yes/no): ")
+            if decision.lower() == 'yes':
+                print("Terminating the process.")
+                break
+            else:
+                print("Resuming...")
 
         # if the language is greek it will only translate, simplify cant work not enough datasets in greek trained
         if language == 'el-GR':
@@ -138,22 +151,10 @@ elif input_mode == 'type':
         # display the text to ASL images
         display_images_sequentially(simplified_text, language, def_delay)
 
+        # timestamps for csv
+        timestamp = datetime.now().strftime("%H:%M:%S")
+
         # save data with the timestamp,text,simplified_text and the speaker 
         save_to_csv(csv_filename, timestamp, text, simplified_text, cur_speaker)
 
-        # switch user
-        if check_switch_command(text, language):
-            print("Who is speaking?")
-            new_speaker = input("Enter the new speaker (e.g., Person 2): ")
-            cur_speaker = new_speaker
-            print(f"Switched to {new_speaker}")
-
-        # termination phrase
-        elif check_termination_phrase(text, language):
-            speak_termination_prompt()
-            decision = input("Do you want to terminate the process? (yes/no): ")
-            if decision.lower() == 'yes':
-                print("Terminating the process.")
-                break
-            else:
-                print("Resuming...")
+        
