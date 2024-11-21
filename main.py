@@ -42,11 +42,11 @@ if input_mode == 'speak':
     # use the default microphone as source, bot asks what language will the user use.
     with sr.Microphone() as source:
         speak_language_prompt()  # language selection 
-        language = select_language()
-        print(f"Listening in {language}...")
+        lang = select_language()
+        print(f"Listening in {lang}...")
 
         # csv file creation
-        csv_filename = os.path.join(directory_path, f"speech_data_{language}.csv")
+        csv_filename = os.path.join(directory_path, f"speech_data_{lang}.csv")
 
         # adjust for ambient noise if necessary
         recognizer.adjust_for_ambient_noise(source)
@@ -58,10 +58,10 @@ if input_mode == 'speak':
                 audio = recognizer.listen(source)
 
                 # convert speech to text using the selected language
-                text = recognizer.recognize_google(audio, language=language)
+                text = recognizer.recognize_google(audio, language=lang)
                 
                 # if the language is greek it will only translate, simplify cant work not enough datasets in greek trained
-                if language == 'el-GR':
+                if lang == 'el-GR':
                     simplified_text = text
                 else:
                     # used to choose between translate or simplify
@@ -71,14 +71,14 @@ if input_mode == 'speak':
                         simplified_text = text  # if anything else than simplify it will just translate the text
 
                 # switch the speaker command
-                if check_switch_command(text, language):
+                if check_switch_command(text, lang):
                     print("Who is speaking?")
                     new_speaker = input("Enter the new speaker (e.g., Person 2): ")
                     cur_speaker = new_speaker
                     print(f"Switched to {new_speaker}")
 
                 # termination function
-                elif check_termination_phrase(text, language):
+                elif check_termination_phrase(text, lang):
                     speak_termination_prompt()
                     decision = input("Do you want to terminate the process? (yes/no): ")
                     if decision.lower() == 'yes':
@@ -92,7 +92,7 @@ if input_mode == 'speak':
 
                 simplified_text = list(simplified_text)
                 #display images
-                display_images_sequentially(simplified_text, language, def_delay)
+                display_images_sequentially(simplified_text, lang, def_delay)
 
                 # timestamp for csv
                 timestamp = datetime.now().strftime("%H:%M:%S")
@@ -108,25 +108,25 @@ if input_mode == 'speak':
 
 elif input_mode == 'type':
     speak_language_prompt()  # language selection
-    language = select_language()
-    print(f"Typing in {language}...")
+    langtype = select_language()
+    print(f"Typing in {langtype}...")
 
     # csv creation 
-    csv_filename = os.path.join(directory_path, f"speech_data_{language}.csv")
+    csv_filename = os.path.join(directory_path, f"speech_data_{langtype}.csv")
 
     while True:
         # manualy input the user text
         text = input(f"{cur_speaker}, please type your input: ").strip()
 
         # switch user
-        if check_switch_command(text, language):
+        if check_switch_command(text, langtype):
             print("Who is speaking?")
             new_speaker = input("Enter the new speaker (e.g., Person 2): ")
             cur_speaker = new_speaker
             print(f"Switched to {new_speaker}")
 
         # termination phrase
-        elif check_termination_phrase(text, language):
+        elif check_termination_phrase(text, langtype):
             speak_termination_prompt()
             decision = input("Do you want to terminate the process? (yes/no): ")
             if decision.lower() == 'yes':
@@ -136,7 +136,7 @@ elif input_mode == 'type':
                 print("Resuming...")
 
         # if the language is greek it will only translate, simplify cant work not enough datasets in greek trained
-        if language == 'el-GR':
+        if langtype == 'el-GR':
             simplified_text = text
         else:
             # used to choose between translate or simplify
@@ -149,7 +149,7 @@ elif input_mode == 'type':
         print(f"Processed Text: {simplified_text}")
 
         # display the text to ASL images
-        display_images_sequentially(simplified_text, language, def_delay)
+        display_images_sequentially(simplified_text, langtype, def_delay)
 
         # timestamps for csv
         timestamp = datetime.now().strftime("%H:%M:%S")
