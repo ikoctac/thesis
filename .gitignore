@@ -12,3 +12,5 @@ results/
 data-pretrained-new.py
 __pyache__/
 .vscode/
+Models/
+model/
