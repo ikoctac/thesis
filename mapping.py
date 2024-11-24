@@ -4,10 +4,10 @@ import tkinter as tk
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 from dotenv import load_dotenv
 
-# Load paths from .env, used to load paths from the env so changes can be made easier
+# load paths from .env, used to load paths from the env so changes can be made easier
 load_dotenv()
 
-# Path for ASL AND GSL (still need to load from .env)
+# path for ASL AND GSL (still need to load from .env)
 ASL_DIR = os.getenv("ASL")
 GSL_DIR = os.getenv("GSL")
 
@@ -16,10 +16,10 @@ model_name = os.getenv("MODEL_T5")
 model = T5ForConditionalGeneration.from_pretrained(model_name) # loads model safetensors
 token = T5Tokenizer.from_pretrained(model_name) # loads generated tokens
 
-def simplify_text_for_asl(input_text):
+def simplify_text_for_asl(text):
     try:
-        input_text = "simplify: " + input_text # used to prepare model to summarize given input text
-        input_ids = token.encode(input_text, return_tensors="pt", max_length=512, truncation=True) # converts text into id tokens for the model and ensures with "pt" that token output is in pytorch format 
+        text = "simplify: " + text # used to prepare model to summarize given input text
+        input_ids = token.encode(text, return_tensors="pt", max_length=512, truncation=True) # converts text into id tokens for the model and ensures with "pt" that token output is in pytorch format 
 
         # used to generate output from our model via given input
         summary_ids = model.generate(
@@ -38,22 +38,22 @@ def simplify_text_for_asl(input_text):
 
     except Exception as e:
         print(f"Error: {e}")
-        return input_text  # Return original text if simplification fails
+        return text  # Return original text if simplification fails
 
-def map_text_to_asl_images(text, language):
+def map_text_to_asl_images(text, lang):
     text = text.upper()
     image_paths = []  # creates a list of image paths based on the given input  
 
-    if language == 'en-US': # choose ASL if language is english
+    if lang == 'en-US': # choose ASL if language is english
         directory = ASL_DIR
-    elif language == 'el-GR': # choose GSL if language is greek
+    elif lang == 'el-GR': # choose GSL if language is greek
         directory = GSL_DIR
     else:
         print("Invalid choice, setting ASL as default.") # defaults ASL cause it has more applications on my program
         directory = ASL_DIR
 
     for letter in text:
-        if letter in [' ', "'", '"', ':', '[', ']', '.', ',', '-', '_']:
+        if letter in [' ', "'", '"', ':', '[', ']', '.', ',', '-', '_','(',')']:
             # Treat spaces as None and skip adding an image path for them, used to avoid errors in display
             image_paths.append(None)
             continue
@@ -69,10 +69,10 @@ def map_text_to_asl_images(text, language):
 
     return image_paths
 
-def display_images_sequentially(text, language, delay, word_gap=1):
+def display_images_sequentially(text, lang, delay, word_gap=1):
     
     # generate image_paths by getting input to according function
-    image_paths = map_text_to_asl_images(text, language)
+    image_paths = map_text_to_asl_images(text, lang)
 
     if not image_paths: # if image paths is empty or doesnt exist output error
         print("No images to display. Check your text or language input.")
@@ -98,7 +98,7 @@ def display_images_sequentially(text, language, delay, word_gap=1):
     thumbnail_canvas.pack(side="left", fill="both", expand=True) # used to manage the widgets displayed from left to right to fill the spaces
 
     # Add a scrollbar to the thumbnail canvas
-    scrollbar = tk.Scrollbar(thumbnail_frame, orient="vertical", command=thumbnail_canvas.yview) # createa scrollbar in the thumbnail frame to create more space for bigger sentences
+    scrollbar = tk.Scrollbar(thumbnail_frame, orient="vertical", command=thumbnail_canvas.yview) # create a scrollbar in the thumbnail frame to create more space for bigger sentences
     scrollbar.pack(side="right", fill="y") # scrollbar positions
 
     thumbnail_canvas.configure(yscrollcommand=scrollbar.set)
@@ -114,7 +114,7 @@ def display_images_sequentially(text, language, delay, word_gap=1):
     thumbnail_canvas.create_window((0, 0), window=inner_frame, anchor="nw")
 
     thumbnail_size = 30 # thumbnail size to get more thumbnails in a row
-    max_thumbnails_per_row = 42 # how many thumbnails in a row
+    max_thumbnails_per_row = 40 # how many thumbnails in a row
     current_row = 0 # starting row
     current_column = 0 # starting column
 
@@ -148,7 +148,6 @@ def display_images_sequentially(text, language, delay, word_gap=1):
             main_image = Image.open(image_paths[i]).convert("RGBA") # properly format for transparency handling (because they were displayed black)
             resized_image = main_image.resize((150, 150), Image.LANCZOS) # riseze to 150x150 for display purposes
             tk_image = ImageTk.PhotoImage(resized_image) # convert image to tkinter compatible object to fit the graphical interface
-
             canvas.delete("all") # delete previous main image to display the new one
             canvas.create_image(0, 0, anchor=tk.NW, image=tk_image) #creates a new image to be able to handle the new input later
             canvas.image = tk_image  # Keep reference to avoid garbage collection
@@ -179,7 +178,7 @@ def display_images_sequentially(text, language, delay, word_gap=1):
         # the time we will display the next image, taking delay time and display image function
         window.after(delay, display_image, i + 1)
 
-        window.update_idletasks() # load window correctly 
+        window.update_idletasks() # load window correctly  
 
     # close the window to insert new input text in the program
     window.bind("<Escape>", lambda event: window.destroy())
