@@ -15,7 +15,7 @@ model = BartForConditionalGeneration.from_pretrained('facebook/bart-base')
 def preprocess_function(examples):
     inputs = examples['Normal']
     targets = examples['Simple']
-    model_inputs = token(inputs, max_length=512, truncation=True, padding='max_length')
+    model_inputs = token(inputs, max_length=512, truncation=True, padding='max_length')# max 512 tokens, cuts off exceeding test, all sequences havethe same length.
     
     # preparing the data from dataset by converting text to tokens to be efficiently processed by the model.
     with token.as_target_tokenizer():
@@ -29,22 +29,21 @@ tokenized_datasets = dataset.map(preprocess_function, batched=True)
 
 # define training arguments for my model(based on my computer power and having an efficient training, make the process faster.) It took≈3.45 hours to train Bart in this dataset
 training_args = TrainingArguments(
-    per_device_train_batch_size=8,  # Adjust based on your GPU VRAM (e.g., 8GB for RTX 4060).
+    per_device_train_batch_size=8,  # Adjust based on your GPU VRAM.
     per_device_eval_batch_size=8,
-    output_dir=r"C:\Users\kostas\Desktop\thesis\model",  # Save model here.
-    overwrite_output_dir=True,  # Overwrite if the directory exists.
-    num_train_epochs=4,  # Increase if needed.
-    logging_dir='./logs',  # Directory for logs.
-    logging_steps=100,  # Log every 100 steps.
-    save_steps=500,  # Save checkpoint every 500 steps.
-    evaluation_strategy="epoch",  # Evaluate after each epoch.
-    learning_rate=5e-5,
-    weight_decay=0.01,
-    warmup_steps=1000,
-    fp16=True,  # Enable mixed precision (requires compatible GPU and environment).
-    save_total_limit=2,  # Keep only the last 2 checkpoints.
+    output_dir=r"C:\Users\kostas\Desktop\thesis\model\BART",  # Directory to save the model.
+    overwrite_output_dir=True,  # Overwrite the content of the output directory if it exists.
+    num_train_epochs=4,  # Number of training epochs.
+    logging_dir=None,  # Disable logging by setting to None.
+    logging_strategy="no",  # Disable logging.
+    save_strategy="no",  # Disable checkpoint saving.
+    evaluation_strategy="no",  # Disable evaluation during training.
+    learning_rate=5e-5,  # Learning rate for the optimizer.
+    weight_decay=0.01,  # Weight decay to prevent overfitting.
+    warmup_steps=1000,  # Number of warmup steps for learning rate scheduler.
+    fp16=True,  # Enable mixed precision training for compatible GPUs.
+    report_to=[],  # Disable reporting to any external services.
 )
-
 
 # initialize the trainer( which model is used, training config, train dataset and test dataset.)
 trainer = Trainer(
