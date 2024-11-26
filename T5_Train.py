@@ -12,8 +12,8 @@ dataset = load_dataset(
 dataset = dataset['train'].train_test_split(test_size=0.1)
 
 # Load tokenizer and model.
-tokenizer = T5Tokenizer.from_pretrained('t5-base')
-model = T5ForConditionalGeneration.from_pretrained('t5-base')
+tokenizer = T5Tokenizer.from_pretrained('t5-small')
+model = T5ForConditionalGeneration.from_pretrained('t5-small')
 
 # Preprocess the dataset.
 def preprocess_function(examples):
@@ -33,19 +33,20 @@ tokenized_datasets = dataset.map(preprocess_function, batched=True, remove_colum
 
 # Define training arguments.
 training_args = TrainingArguments(
-    per_device_train_batch_size=8,  # adjusted for gpu storage, to load more examples
+    per_device_train_batch_size=8,  # Adjust based on your GPU VRAM.
     per_device_eval_batch_size=8,
-    output_dir=r"C:\Users\kostas\Desktop\thesis\model\T5",  # where to save the model
-    overwrite_output_dir=True,  # overwrite folder if it exists
-    num_train_epochs=4,  # number of trainning passes over the dataset
-    logging_dir='./logs',  # dir for logs
-    logging_steps=100,  # logs every 100 steps 
-    save_steps=500,  # checkpoint every 500 steps if train stops
-    learning_rate=5e-5, # weight adjustment during the training
-    weight_decay=0.01, # prevents overfiting
-    warmup_steps=1000,
-    fp16=True,  # speed up trainning in compatible gpus 
-    save_total_limit=2,  # Keep only the last 2 checkpoints.
+    output_dir=r"C:\Users\kostas\Desktop\thesis\model\model-T5",  # Directory to save the model.
+    overwrite_output_dir=True,  # Overwrite the content of the output directory if it exists.
+    num_train_epochs=4,  # Number of training epochs.
+    logging_dir=None,  # Disable logging by setting to None.
+    logging_strategy="no",  # Disable logging.
+    save_strategy="no",  # Disable checkpoint saving.
+    evaluation_strategy="no",  # Disable evaluation during training.
+    learning_rate=5e-5,  # Learning rate for the optimizer.
+    weight_decay=0.01,  # Weight decay to prevent overfitting.
+    warmup_steps=1000,  # Number of warmup steps for learning rate scheduler.
+    fp16=True,  # Enable mixed precision training for compatible GPUs.
+    report_to=[],  # Disable reporting to any external services.
 )
 
 # Initialize the Trainer.

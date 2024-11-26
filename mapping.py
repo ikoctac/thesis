@@ -42,6 +42,7 @@ def simplify_text_for_asl(text):
 
 def map_text_to_asl_images(text, lang):
     text = text.upper()
+    
     image_paths = []  # creates a list of image paths based on the given input  
 
     if lang == 'en-US': # choose ASL if language is english

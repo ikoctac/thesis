@@ -90,9 +90,6 @@ if input_mode == 'speak':
                 # print procecced text
                 print(f"Processed Text: {simplified_text}")
 
-                # helps when they are going to be displayed in the thumbnail
-                simplified_text = list(simplified_text)
-
                 #display images
                 display_images_sequentially(simplified_text, lang, def_delay)
 
