@@ -12,8 +12,8 @@ dataset = load_dataset(
 dataset = dataset['train'].train_test_split(test_size=0.1)
 
 # Load tokenizer and model.
-tokenizer = T5Tokenizer.from_pretrained('t5-small')
-model = T5ForConditionalGeneration.from_pretrained('t5-small')
+tokenizer = T5Tokenizer.from_pretrained('t5-base')
+model = T5ForConditionalGeneration.from_pretrained('t5-base')
 
 # Preprocess the dataset.
 def preprocess_function(examples):
