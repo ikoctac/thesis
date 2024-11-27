@@ -14,7 +14,7 @@ video_path = r'C:\Users\kostas\Desktop\thesis\Feature_code\video\Car Accident .m
 cap = cv2.VideoCapture(video_path)
 
 # Prepare CSV file for writing
-csv_file_path = 'hand_landmarks.csv'
+csv_file_path = r'C:\Users\kostas\Desktop\thesis\Feature_code\hand_landmarks.csv'
 with open(csv_file_path, mode='w', newline='') as csv_file:
     csv_writer = csv.writer(csv_file)
     # Write header with clear descriptions
