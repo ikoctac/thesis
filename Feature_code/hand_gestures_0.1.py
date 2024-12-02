@@ -10,11 +10,11 @@ hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5
 mp_drawing = mp.solutions.drawing_utils
 
 # Open video capture
-video_path = r'C:\Users\kostas\Desktop\thesis\Feature_code\video\Car Accident .mp4'
+video_path = r'C:\Users\theap\Desktop\thesis\Feature_code\video\Car Accident .mp4'
 cap = cv2.VideoCapture(video_path)
 
 # Prepare CSV file for writing
-csv_file_path = r'C:\Users\kostas\Desktop\thesis\Feature_code\hand_landmarks.csv'
+csv_file_path = r'C:\Users\theap\Desktop\thesis\Feature_code\hand_landmarks.csv'
 with open(csv_file_path, mode='w', newline='') as csv_file:
     csv_writer = csv.writer(csv_file)
     # Write header with clear descriptions

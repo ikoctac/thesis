@@ -81,7 +81,7 @@ def display_images_sequentially(text, lang, delay, word_gap=1):
 
     window = tk.Tk() # create a tkinter window to display ASL or GSL images
     window.title("Sign Language Viewer") # window title
-    window.geometry("1920x1080") # windows geometry
+    window.geometry("1280x720") # windows geometry
 
     canvas = tk.Canvas(window, width=150, height=150, bg="white") # create widget to display the image in 
     canvas.grid(row=0, column=0, sticky="nsew", padx=5, pady=5) # position the canvas top left grid to display images in, also it fills the available space 
@@ -115,7 +115,7 @@ def display_images_sequentially(text, lang, delay, word_gap=1):
     thumbnail_canvas.create_window((0, 0), window=inner_frame, anchor="nw")
 
     thumbnail_size = 30 # thumbnail size to get more thumbnails in a row
-    max_thumbnails_per_row = 40 # how many thumbnails in a row
+    max_thumbnails_per_row = 32 # how many thumbnails in a row
     current_row = 0 # starting row
     current_column = 0 # starting column
 

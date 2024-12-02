@@ -59,16 +59,6 @@ if input_mode == 'speak':
 
                 # convert speech to text using the selected language
                 text = recognizer.recognize_google(audio, language=lang)
-                
-                # if the language is greek it will only translate, simplify cant work not enough datasets in greek trained
-                if lang == 'el-GR':
-                    simplified_text = text
-                else:
-                    # used to choose between translate or simplify
-                    if mode_choice == 'simplify':
-                        simplified_text = simplify_text_for_asl(text)
-                    else:
-                        simplified_text = text  # if anything else than simplify it will just translate the text
 
                 # switch the speaker command
                 if check_switch_command(text, lang):
@@ -86,6 +76,16 @@ if input_mode == 'speak':
                         break
                     else:
                         print("Resuming...")
+                
+                # if the language is greek it will only translate, simplify cant work not enough datasets in greek trained
+                if lang == 'el-GR':
+                    simplified_text = text
+                else:
+                    # used to choose between translate or simplify
+                    if mode_choice == 'simplify':
+                        simplified_text = simplify_text_for_asl(text)
+                    else:
+                        simplified_text = text  # if anything else than simplify it will just translate the text
 
                 # print procecced text
                 print(f"Processed Text: {simplified_text}")
