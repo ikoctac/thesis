@@ -66,6 +66,7 @@ if input_mode == 'speak':
                     new_speaker = input("Enter the new speaker (e.g., Person 2): ")
                     cur_speaker = new_speaker
                     print(f"Switched to {new_speaker}")
+                    continue
 
                 # termination function
                 elif check_termination_phrase(text, lang):
