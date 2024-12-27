@@ -1,19 +1,8 @@
-
-my_env/
 venv/
 .env
-model-t5/
-model-bart/
-t5/
-csv_files/*.csv
-data-bart.py
 logs/
-results/
-data-pretrained-new.py
-__pyache__/
 .vscode/
 Models/
-model/
 .gitignore/
 BART_Train.py
 BART_Train.py
@@ -22,6 +11,7 @@ word/
 Feature_code/
 Evaluation/
 dataset/
-csv_files/
+csv_files/*
 Perfomance scripts/
-__pyache__/
+
+
