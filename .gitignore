@@ -14,3 +14,12 @@ __pyache__/
 .vscode/
 Models/
 model/
+.gitignore/
+BART_Train.py
+BART_Train.py
+T5_Train.py
+word/
+Feature_code/
+Evaluation/
+dataset/
+csv_files/
