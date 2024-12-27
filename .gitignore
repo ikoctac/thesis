@@ -4,6 +4,7 @@ logs/
 .vscode/
 Models/
 .gitignore/
+.gitatrributes/
 BART_Train.py
 BART_Train.py
 T5_Train.py
