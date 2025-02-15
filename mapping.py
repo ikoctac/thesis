@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageTk
 import tkinter as tk
-from transformers import T5ForConditionalGeneration, T5Tokenizer
+from transformers import BartForConditionalGeneration, BartTokenizer
 from dotenv import load_dotenv
 
 # load paths from .env, used to load paths from the env so changes can be made easier
@@ -12,14 +12,14 @@ ASL_DIR = os.getenv("ASL")
 GSL_DIR = os.getenv("GSL")
 
 # loads model from path, model is downloaded t5 and pretrained on a dataset of normal to simple sentences to work better for summarize
-model_name = os.getenv("MODEL_T5")
-model = T5ForConditionalGeneration.from_pretrained(model_name) # loads model safetensors
-token = T5Tokenizer.from_pretrained(model_name) # loads generated tokens
+model_name = os.getenv("MODEL_BART")
+model = BartForConditionalGeneration.from_pretrained(model_name) # loads model safetensors
+token = BartTokenizer.from_pretrained(model_name) # loads generated tokens
 
 def simplify_text_for_asl(text):
     try:
-        text = "simplify: " + text # used to prepare model to summarize given input text
-        input_ids = token.encode(text, return_tensors="pt", max_length=512, truncation=True) # converts text into id tokens for the model and ensures with "pt" that token output is in pytorch format 
+        text = "summarize this sentence: " + text # used to prepare model to summarize given input text
+        input_ids = token.encode(text, return_tensors="pt", max_length=256, truncation=True) # converts text into id tokens for the model and ensures with "pt" that token output is in pytorch format 
 
         # used to generate output from our model via given input
         summary_ids = model.generate(
@@ -33,7 +33,7 @@ def simplify_text_for_asl(text):
         )
 
         simplified_text = token.decode(summary_ids[0], skip_special_tokens=True) # decodes produced token ids into readable text
-        simplified_text = simplified_text.replace("simplify:", "").strip() # incase program includes the simplify from the start
+        simplified_text = simplified_text.replace("ssummarize this sentence:", "").strip() # incase program includes the simplify from the start
         return simplified_text
 
     except Exception as e:
@@ -176,10 +176,13 @@ def display_images_sequentially(text, lang, delay, word_gap=1):
             current_column = 0
             current_row += 2
 
+
+        window.update_idletasks() # load window correctly  
+        
         # the time we will display the next image, taking delay time and display image function
         window.after(delay, display_image, i + 1)
 
-        window.update_idletasks() # load window correctly  
+        
 
     # close the window to insert new input text in the program
     window.bind("<Escape>", lambda event: window.destroy())
